@@ -87,6 +87,7 @@ prefixdir = get_option('prefix')
 
 srcdir = meson.source_root()
 bindir = join_paths(prefixdir, get_option('bindir'))
+sbindir = join_paths(prefixdir, get_option('sbindir'))
 libexecdir = join_paths(prefixdir, get_option('libexecdir'))
 datadir = join_paths(prefixdir, get_option('datadir'))
 sysconfdir = join_paths(prefixdir, get_option('sysconfdir'))
@@ -160,6 +161,7 @@ subs = configuration_data()
 subs.set('dbname', dbname)
 subs.set('dbdir', dbdir)
 subs.set('libexecdir', libexecdir)
+subs.set('sbindir', sbindir)
 subs.set('privileged_group', privileged_group)
 subs.set('version', meson.project_version())
 
@@ -325,7 +327,7 @@ executable('boltd',
     cargs,
   ],
   install: true,
-  install_dir: libexecdir)
+  install_dir: sbindir)
 
 
 # command line tools
