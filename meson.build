@@ -76,7 +76,6 @@ gio     = dependency('gio-2.0')
 libudev = dependency('libudev')
 unix    = dependency('gio-unix-2.0')
 udev    = dependency('udev')
-polkit  = dependency('polkit-gobject-1')
 mockdev = dependency('umockdev-1.0', required: false)
 
 git     = find_program('git', required: false)
@@ -146,10 +145,6 @@ foreach fn : [
   have = compiler.has_function(fn[0], prefix: fn[1], args: '-D_GNU_SOURCE')
   conf.set10('HAVE_FN_' + fn[0].to_upper(), have)
 endforeach
-
-if polkit.version().version_compare('>= 0.114')
-  conf.set('HAVE_POLKIT_AUTOPTR', '1')
-endif
 
 conf.set('IS_COVERITY_BUILD', get_option('coverity'))
 
@@ -283,26 +278,6 @@ install_data(service_file,
   install_dir: join_paths(datadir, 'dbus-1', 'system-services')
 )
 
-policy_rules = configure_file(
-  input: 'policy/org.freedesktop.bolt.rules.in',
-  output: 'org.freedesktop.bolt.rules',
-  configuration: subs
-)
-
-install_data(policy_rules,
-  install_dir: join_paths(datadir, 'polkit-1', 'rules.d')
-)
-
-policy_file = configure_file(
-  input: 'policy/org.freedesktop.bolt.policy.in',
-  output: 'org.freedesktop.bolt.policy',
-  configuration: subs
-)
-
-install_data(policy_file,
-  install_dir: join_paths(datadir, 'polkit-1', 'actions')
-)
-
 unit_file = configure_file(
   input: 'data/bolt.service.in',
   output: 'bolt.service',
@@ -323,7 +298,6 @@ daemon_deps = [
   glib,
   gio,
   libudev,
-  polkit,
   unix,
   common
 ]
