@@ -39,6 +39,8 @@ static gboolean bouncer_initialize (GInitable    *initable,
 struct _BoltBouncer
 {
   GObject object;
+
+  /* */
 };
 
 G_DEFINE_TYPE_WITH_CODE (BoltBouncer, bolt_bouncer, G_TYPE_OBJECT,
@@ -49,6 +51,9 @@ G_DEFINE_TYPE_WITH_CODE (BoltBouncer, bolt_bouncer, G_TYPE_OBJECT,
 static void
 bolt_bouncer_finalize (GObject *object)
 {
+  BoltBouncer *bouncer = BOLT_BOUNCER (object);
+
+  G_OBJECT_CLASS (bolt_bouncer_parent_class)->finalize (object);
 }
 
 static void
@@ -59,11 +64,16 @@ bolt_bouncer_init (BoltBouncer *bouncer)
 static void
 bolt_bouncer_class_init (BoltBouncerClass *klass)
 {
+  GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
+
+  gobject_class->finalize = bolt_bouncer_finalize;
+
 }
 
 static void
 bouncer_initable_iface_init (GInitableIface *iface)
 {
+  iface->init = bouncer_initialize;
 }
 
 static gboolean
@@ -71,6 +81,10 @@ bouncer_initialize (GInitable    *initable,
                     GCancellable *cancellable,
                     GError      **error)
 {
+  BoltBouncer *bnc = BOLT_BOUNCER (initable);
+
+  bolt_info (LOG_TOPIC ("bouncer"), "not initializing polkit, support removed");
+
   return TRUE;
 }
 
@@ -120,4 +134,15 @@ void
 bolt_bouncer_add_client (BoltBouncer *bnc,
                          gpointer     client)
 {
+
+  g_return_if_fail (BOLT_IS_BOUNCER (bnc));
+  g_return_if_fail (BOLT_IS_EXPORTED (client));
+
+  g_signal_connect_object (client, "authorize-method",
+                           G_CALLBACK (handle_authorize_method),
+                           bnc, 0);
+
+  g_signal_connect_object (client, "authorize-property",
+                           G_CALLBACK (handle_authorize_property),
+                           bnc, 0);
 }
